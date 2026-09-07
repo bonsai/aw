@@ -1,116 +1,29 @@
 # 🌱 repo2agent
 
-**Repository → Agent Workflow**
+**Repository → Structure → Agent Workflow**
 
-`repo2agent` is the **midwife of agents**: it reads a repository's existing codebase and discovers what agents and agentic workflows the repository should have.
+`repo2agent` is the **midwife of agents**: it reads a repository's existing codebase, discovers its structure, proposes semantic clusters and agents, and generates agentic workflows after approval.
 
-The goal is not to generate YAML blindly. The goal is to turn the repository's **README, source code, data, tests, configuration, issues, and existing workflows** into a repository ontology, then propose and generate the agents/workflows that naturally belong to that repository.
+The goal is not to generate YAML blindly. The goal is to turn repository evidence into an intermediate ontology and workforce proposal.
 
-## Concept
-
-```text
-GitHub Repository
-       │
-       ├── README
-       ├── source code
-       ├── data
-       ├── tests
-       ├── config
-       ├── Issues
-       └── existing workflows
-       │
-       ▼
-  Repository Understanding
-       │
-       ▼
-  Repository Ontology
-       │
-       ├── capabilities
-       ├── responsibilities
-       ├── data flows
-       ├── constraints
-       └── evidence
-       │
-       ▼
-   Agent Candidates
-       │
-       ▼
- Workflow Candidates
-       │
-       ▼
- Human Review / Policy Gate
-       │
-       ▼
-.github/workflows/*.md
-       │
-       │  YAML frontmatter + natural-language instructions
-       ▼
-   gh aw compile
-       │
-       ▼
-*.lock.yml
-       │
-       ▼
- GitHub Actions / gh-aw
-```
-
-## Why `repo2agent`?
-
-A repository already contains the strongest evidence of what its agents should do.
-
-Instead of starting with:
-
-```text
-"What agent should I build?"
-```
-
-start with:
-
-```text
-"What does this repository already know how to do?"
-```
-
-`repo2agent` extracts that knowledge and turns it into an **agent workforce proposal**.
-
-## The Midwife Model
-
-`repo2agent` is neither the CEO nor the worker.
-
-It does not decide the business direction, and it does not replace the agents it creates.
-
-It acts as a **midwife**:
-
-- discovers capabilities already present in the repository
-- identifies missing responsibilities
-- proposes suitable agents
-- proposes workflows connecting those agents
-- records the evidence behind each proposal
-- generates GitHub Agentic Workflow source after approval
-- hands execution to `gh-aw` / GitHub Actions
-
-```text
-.company       = organization / policy
-repo2agent     = agent midwife / compiler
-agent          = specialist
-workflow       = orchestration
-repos/         = repository data
-GitHub Actions = execution
-```
-
-## Repository → Agent
-
-The fundamental transformation is:
+## Core transformation
 
 ```text
 Repository
    ↓
+Observe
+   ↓
 Understand
    ↓
-Model
+Structure
    ↓
-Discover
+Cluster
    ↓
-Propose
+Propose domain / capability
+   ↓
+Propose agents
+   ↓
+Propose workflows
    ↓
 Approve
    ↓
@@ -121,36 +34,77 @@ Compile
 Execute
 ```
 
-### Example
+### repo2cluster
 
-For a quiz repository, `repo2agent` might discover:
+Repository clustering belongs in AW because it is **discovery**, not ontology declaration.
 
 ```text
-Repository capabilities
-├── question JSON
-├── quiz UI
-├── validation
-├── historical source data
-└── tests
-
-Agent candidates
-├── quiz-generator
-├── quiz-validator
-├── fact-checker
-└── data-maintainer
-
-Workflow candidates
-├── generate-quiz
-├── validate-quiz
-├── check-facts
-└── update-data
+GitHub
+   ↓
+ bonsai/repos
+   ↓
+name / description / topics / language / README
+   ↓
+semantic features
+   ↓
+vectorization
+   ↓
+KMeans / clustering
+   ↓
+cluster profile
+   ↓
+proposed domain
+   ↓
+ontology validation
+   ↓
+ecosystem/domains/*.yaml
 ```
 
-The important point is that these agents are **derived from repository evidence**, rather than being hard-coded as a universal organization chart.
+The reusable experiment is defined in [`skills/repo2cluster.yaml`](skills/repo2cluster.yaml).
+
+## Boundary
+
+```text
+observed   → GitHub metadata, topics, repository text
+inferred   → similarity, clusters, dominant topics
+proposed   → domains, capabilities, synapses, agents
+validated  → reviewed structure
+ declared  → ecosystem ontology
+```
+
+**AW discovers. Ecosystem declares.**
+
+Clustering must never silently rewrite the ontology. Its output is evidence-backed proposal data that can be reviewed and then promoted into `bonsai/ecosystem`.
+
+## The Midwife Model
+
+`repo2agent` is neither the CEO nor the worker.
+
+It acts as a **midwife**:
+
+- discovers capabilities already present in repositories
+- discovers semantic communities across repositories
+- identifies missing responsibilities
+- proposes domains and capabilities
+- proposes suitable agents
+- proposes workflows connecting those agents
+- records evidence and confidence
+- generates workflow source after approval
+- hands execution to `gh-aw` / GitHub Actions
+
+```text
+.company       = organization / policy
+AW             = observer / clusterer / agent midwife / compiler
+agent          = specialist
+workflow       = orchestration
+repos/         = repository observations
+ecosystem/     = declared semantic world
+GitHub Actions = execution
+```
 
 ## Agent Proposal Schema
 
-`schema.json` is intended to describe the intermediate model between a repository and generated workflows.
+`schema.json` describes the intermediate model between repository evidence and generated workflows:
 
 ```json
 {
@@ -165,125 +119,144 @@ The important point is that these agents are **derived from repository evidence*
 }
 ```
 
-This intermediate layer is important. `repo2agent` should **not** perform a direct `README → YAML` conversion.
+This intermediate layer is essential. AW should not perform a direct `README → YAML` conversion.
 
 ```text
 README ─┐
 Code   ─┤
-Issues ─┤→ Ontology → Agent Proposal → Workflow Proposal
-Tests  ─┤                                      ↓
-Config ─┘                                  Approval
-                                             ↓
-                                      Agentic Workflow
+Issues ─┤→ Understanding → Structure → Proposal
+Tests  ─┤                         │
+Config ─┘                         ├→ Domain / Cluster
+                                  ├→ Agent
+                                  └→ Workflow
+                                         ↓
+                                      Approval
+                                         ↓
+                                   Agentic Workflow
 ```
 
 ## GitHub Agentic Workflows
 
 GitHub Agentic Workflows use Markdown workflow source with YAML frontmatter. The source is compiled by `gh aw compile` into a machine-ready `.lock.yml` workflow.
 
-Therefore the output of `repo2agent` is conceptually:
-
 ```text
-repo2agent
-    ↓
+AW
+ ↓
 .github/workflows/<agent-or-workflow>.md
-    ↓
+ ↓
 gh aw compile
-    ↓
+ ↓
 .github/workflows/<agent-or-workflow>.lock.yml
+ ↓
+GitHub execution
 ```
-
-`repo2agent` is consequently a **compiler front-end / workforce designer**, while `gh-aw` is the execution-oriented workflow compiler/runtime layer.
 
 ## Design Principles
 
 ### 1. Evidence before agents
+Every proposed agent or domain should be traceable to repository evidence.
 
-Every proposed agent should be traceable to repository evidence.
+### 2. Discovery before declaration
+Clustering is an inference mechanism. It does not become ontology automatically.
 
-### 2. Ontology before workflow
+### 3. Ontology before workflow
+Understand the repository and its semantic neighborhood before deciding how to automate it.
 
-Understand the repository before deciding how to automate it.
+### 4. Proposal before execution
+Agent and workflow creation passes through a review/policy gate.
 
-### 3. Proposal before execution
+### 5. No hard-coded departments
+The repository evidence determines candidate structure. Similar repositories may produce different workforces.
 
-Agent creation should pass through a review/policy gate rather than silently modifying the repository.
+### 6. Agents are replaceable
+The durable assets are ontology, evidence, and workflow contracts.
 
-### 4. No hard-coded departments
-
-The repository determines its candidate workforce. Similar repositories may produce different organizational structures.
-
-### 5. Agents are replaceable
-
-The durable asset is the repository ontology and workflow contract, not a particular model or agent implementation.
-
-### 6. Execution is downstream
-
-`repo2agent` discovers and generates. GitHub Actions / `gh-aw` executes.
+### 7. Execution is downstream
+AW discovers and generates. `gh-aw` / GitHub Actions executes.
 
 ## Architecture
 
 ```text
-                 bonsai.company
-                       │
-                 organization
-                       │
-                       ▼
-                  repo2agent
-                       │
-          ┌────────────┼────────────┐
-          ▼            ▼            ▼
-       repos/       ontology     evidence
-          │            │            │
-          └────────────┼────────────┘
-                       ▼
-                agent candidates
-                       │
-                       ▼
-              workflow candidates
-                       │
-                       ▼
-                 approval gate
-                       │
-                       ▼
-                .aw.md / .md
-                       │
-                       ▼
+                  bonsai.company
+                        │
+                  organization
+                        │
+                        ▼
+                       AW
+                repo2agent / repo2cluster
+                        │
+          ┌─────────────┼─────────────┐
+          ▼             ▼             ▼
+       repos/        ontology      evidence
+          │             │             │
+          └─────────────┼─────────────┘
+                        ▼
+                semantic structure
+                        │
+          ┌─────────────┼─────────────┐
+          ▼             ▼             ▼
+       clusters     capabilities    agents
+          │             │             │
+          └─────────────┼─────────────┘
+                        ▼
+                workflow candidates
+                        │
+                        ▼
+                  approval gate
+                        │
+                        ▼
                  gh aw compile
-                       │
-                       ▼
-                  .lock.yml
-                       │
-                       ▼
-                GitHub execution
+                        │
+                        ▼
+                  GitHub execution
+                        │
+                        ▼
+                    evidence
+                        │
+                        └────→ semantic review
 ```
 
-## Relation to `aw`
+## Relation to the Bonsai ecosystem
 
-`aw` is the foundation for this transformation.
+```text
+repos
+  ↓ observation
+AW
+  ↓ discovery / proposal
+ecosystem
+  ↓ semantic declaration
+ontology
+  ↓ meaning
+synapse
+  ↓ relationships
+matrix
+  ↓ computation
+BQML
+  ↓ learning
+AW
+  ↓ reorganize / regenerate
+```
 
-The original `aw.tui` concept focused on observing repositories and discovering communities. That observation layer remains useful, but the strategic direction is broader:
-
-> **Observe repositories → understand them → discover agents → generate workflows.**
-
-The repository itself becomes the starting point of agent organization.
+This makes AW the **self-organization engine at the boundary between observed repositories and declared organizational structure**.
 
 ## Roadmap
 
 - [ ] Repository inventory and evidence extraction
 - [ ] README / code / issue understanding
-- [ ] Repository ontology schema
-- [ ] Agent candidate generation
-- [ ] Workflow candidate generation
-- [ ] Evidence and confidence scoring
-- [ ] Human approval gate
+- [ ] `repo2cluster` implementation
+- [ ] cluster profiling and confidence scoring
+- [ ] proposed domain generation
+- [ ] repository ontology extraction
+- [ ] agent candidate generation
+- [ ] workflow candidate generation
+- [ ] human approval gate
 - [ ] `.github/workflows/*.md` generation
 - [ ] `gh aw compile` integration
-- [ ] Workflow validation and safety checks
+- [ ] workflow validation and safety checks
 - [ ] CLI/API interface
 - [ ] MCP interface
 - [ ] BQML-based repository clustering and workforce analysis
 
 ## One-line definition
 
-> **repo2agent turns a repository's existing knowledge into a proposed agent workforce and executable agentic workflows.**
+> **AW observes repositories, discovers their semantic structure, proposes the workforce, and turns approved structure into executable agentic workflows.**
