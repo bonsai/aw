@@ -1,0 +1,19 @@
+id: domain2synapse
+version: "0.1"
+purpose: Generate candidate synapses connecting a proposed domain to repositories, capabilities, agents, and providers.
+inputs:
+  - proposed_domain
+  - repository_evidence
+  - capability_matches
+outputs:
+  - proposed_synapses
+status: proposed
+fields:
+  - from
+  - to
+  - relation
+  - weight
+  - confidence
+  - evidence
+  - status
+validation_owner: bonsai/ecosystem
