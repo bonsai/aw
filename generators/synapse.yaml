@@ -1,0 +1,30 @@
+id: synapse-generator
+version: "0.1"
+kind: synapse
+
+inputs:
+  - source_entity
+  - target_entity
+  - shared_evidence
+  - semantic_similarity
+  - capability_match
+
+outputs:
+  - synapse.yaml
+
+fields:
+  - from
+  - to
+  - relation
+  - weight
+  - confidence
+  - evidence
+  - status
+
+lifecycle:
+  default_status: proposed
+  validation_owner: bonsai/ecosystem
+
+rule: >
+  Generate weighted relationship candidates with explicit evidence and
+  confidence. Synapses are proposals until validated.
