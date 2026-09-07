@@ -1,8 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://bonsai.github.io/ontology/schema.json",
-  "title": "Bonsai Ontology",
-  "description": "MVC + Ontology definitions for bonsai organization, assets, agents, workflows, states, and actions.",
+  "title": "Bonsai Agentic Workflow Ontology",
+  "description": "Ontology definitions for bonsai agentic workflow orchestration.",
   "type": "object",
   "properties": {
     "organization": {
@@ -17,8 +17,8 @@
     "agent": {
       "$ref": "#/definitions/Agent"
     },
-    "workflow": {
-      "$ref": "#/definitions/Workflow"
+    "equipment": {
+      "$ref": "#/definitions/Equipment"
     },
     "state": {
       "$ref": "#/definitions/State"
@@ -67,7 +67,7 @@
       "properties": {
         "kind": {
           "type": "string",
-          "enum": ["repository", "dataset", "model", "skill", "mcp", "agent", "workflow"]
+          "enum": ["aw", "mcp", "model", "skill", "dataset", "repository", "agent"]
         },
         "name": { "type": "string" },
         "repository": { "type": "string" },
@@ -81,46 +81,41 @@
         "name": { "type": "string" },
         "description": { "type": "string" },
         "equipment": {
-          "type": "object",
-          "properties": {
-            "repositories": {
-              "type": "array",
-              "items": { "type": "string" }
-            },
-            "skills": {
-              "type": "array",
-              "items": { "type": "string" }
-            },
-            "models": {
-              "type": "array",
-              "items": { "type": "string" }
-            },
-            "mcp": {
-              "type": "array",
-              "items": { "type": "string" }
-            }
-          }
+          "$ref": "#/definitions/Equipment"
         }
       }
     },
-    "Workflow": {
+    "Equipment": {
       "type": "object",
-      "required": ["name", "steps"],
+      "description": "7 tools an agent can be equipped with",
       "properties": {
-        "name": { "type": "string" },
-        "description": { "type": "string" },
-        "steps": {
+        "aw": {
           "type": "array",
-          "items": {
-            "type": "object",
-            "required": ["action"],
-            "properties": {
-              "action": { "type": "string" },
-              "agent": { "type": "string" },
-              "input": { "type": "object" },
-              "approval": { "type": "boolean" }
-            }
-          }
+          "items": { "type": "string" }
+        },
+        "mcp": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "model": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "skill": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "dataset": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "repository": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "agent": {
+          "type": "array",
+          "items": { "type": "string" }
         }
       }
     },
@@ -150,7 +145,7 @@
         "name": { "type": "string" },
         "kind": {
           "type": "string",
-          "enum": ["view", "configure", "equip", "inspect", "calculate", "run", "approve"]
+          "enum": ["view", "configure", "equip", "unequip", "inspect", "calculate", "run", "approve"]
         },
         "description": { "type": "string" },
         "target": { "type": "string" }
