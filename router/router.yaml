@@ -1,0 +1,25 @@
+# AW semantic router
+id: aw-router
+version: "0.1"
+purpose: >
+  Route observations and requests to discovery, proposal, generation, validation,
+  and execution capabilities.
+
+routes:
+  - when: repository_observation
+    skill: repo2cluster
+  - when: semantic_cluster
+    skill: cluster2domain
+  - when: proposed_domain
+    skill: domain2repo
+  - when: proposed_domain
+    skill: domain2synapse
+  - when: repository_capability
+    skill: repo2agent
+  - when: approved_agent_or_workflow
+    skill: workflow-generator
+
+governance:
+  proposal_required: true
+  declaration_owner: bonsai/ecosystem
+  execution_owner: github-actions
