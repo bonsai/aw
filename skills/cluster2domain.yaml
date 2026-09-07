@@ -1,0 +1,13 @@
+id: cluster2domain
+version: "0.1"
+purpose: Convert an inferred semantic cluster into an evidence-backed domain proposal.
+inputs:
+  - cluster_profile
+  - repository_evidence
+outputs:
+  - proposed_domain
+status: proposed
+next:
+  - domain2synapse
+  - domain2repo
+validation_owner: bonsai/ecosystem
