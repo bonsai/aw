@@ -1,0 +1,54 @@
+data:
+    repos.tags.tsv:
+        file: data/repos.tags.tsv
+        note: 手メンテ curated インベントリ。~/repos/db/repos.tags.tsv 由来の正本（dataぽい資産として保全）
+files:
+    go:
+        - repos/topics.go
+        - repos/fetchall.go
+        - cmd/repo/topics.go
+        - cmd/repo/root.go
+gate: step2 の diff レビュー承認後にのみ step3 実行。apply は破壊的（上書き）のため force push 同様の承認ルール適用
+id: addTopics.aw
+name: addTopics
+objective: GitHub repos の topics（メタデータ）を作成・適用する
+owner: bonsai
+steps:
+    - action: aw repo topics build
+      order: 1
+      target: metadata 生成 repos.topics.json
+    - action: review
+      order: 2
+      target: dry-run `aw repo topics apply` で差分確認（curated/derived）
+    - action: aw repo topics apply --apply
+      order: 3
+      target: GitHub topics へ本反映
+    - action: verify
+      order: 4
+      target: gh api repos/bonsai/<repo>/topics で反映確認
+tools:
+    aw:
+        commands:
+            apply:
+                description: topics メタデータを GitHub へ PUT /repos/{owner}/{repo}/topics で適用。--apply なしは dry-run
+                gate: dry-run レビュー後、--apply で本反映（force 操作のため要承認）
+                usage: repo topics apply -i repos.topics.json [--apply]
+            build:
+                description: GitHub repos 一覧 + data/repos.tags.tsv（curated）を統合し、repo単位の topics メタデータ JSON を生成する
+                input:
+                    tsv: 'data/repos.tags.tsv (curated tags: repo/lang/git/remote/tags, local-only の資産も含む)'
+                output:
+                    file: repos.topics.json
+                    schema:
+                        count: int
+                        generated: RFC3339
+                        owner: string
+                        repos:
+                            - full_name: string
+                              source: curated|derived|empty
+                              topics:
+                                - string
+                usage: repo topics build --output repos.topics.json
+        repository: https://github.com/bonsai/aw.tui
+type: workflow
+version: 1.0.0
