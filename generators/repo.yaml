@@ -1,0 +1,26 @@
+# Repo generator manifest
+id: repo-generator
+version: "0.1"
+kind: repository
+
+inputs:
+  - proposed_domain
+  - ontology
+  - synapses
+  - agents
+
+outputs:
+  repository:
+    structure:
+      - README.md
+      - AGENTS.md
+      - domain.yaml
+      - ontology.yaml
+      - synapse.yaml
+      - agents/
+      - .github/workflows/
+
+policy:
+  default_status: proposed
+  create_requires_validation: true
+  owner: bonsai
