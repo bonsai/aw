@@ -1,0 +1,159 @@
+# Repository -> semantic cluster proposal
+# AW skill: observe repository metadata and propose semantic domain structure.
+# Ontology declarations remain outside AW and require validation.
+
+id: repo2cluster
+name: Repository Semantic Clustering
+version: "0.1"
+
+purpose: >
+  Discover semantic communities among repositories from observable GitHub
+  metadata and repository text, then produce evidence-backed cluster and
+  domain proposals for review.
+
+source:
+  repository: bonsai/repos
+  observations:
+    - name
+    - description
+    - topics
+    - language
+    - license
+    - stars
+    - forks
+    - open_issues
+    - created_at
+    - updated_at
+    - default_branch
+    - archived
+    - visibility
+  optional_semantic_sources:
+    - README
+    - package_manifest
+    - directory_names
+    - workflow_names
+
+feature_model:
+  identity:
+    - repository_name
+  semantic:
+    - description_text
+    - topics
+    - readme_terms
+  technical:
+    - primary_language
+    - dependency_terms
+    - workflow_terms
+  activity:
+    - stars
+    - forks
+    - open_issues
+    - updated_at
+
+normalization:
+  text:
+    - lowercase
+    - tokenize
+    - remove_stopwords
+    - normalize_hyphens
+  topics:
+    - lowercase
+    - deduplicate
+    - map_synonyms
+  repository_name:
+    - split_by_hyphen
+    - split_by_underscore
+
+embedding:
+  inputs:
+    - repository_name
+    - description_text
+    - topics
+    - readme_terms
+    - primary_language
+  strategy:
+    baseline: tfidf
+    optional: text_embedding
+
+clustering:
+  baseline:
+    algorithm: kmeans
+    input: repository_vectors
+    k_range: [3, 4, 5, 6, 8, 10]
+    selection: silhouette_score
+  alternatives:
+    - hierarchical
+    - dbscan
+
+outputs:
+  repository_cluster:
+    fields:
+      - repository
+      - cluster_id
+      - distance
+      - confidence
+  cluster_profile:
+    fields:
+      - cluster_id
+      - top_topics
+      - top_terms
+      - repositories
+      - dominant_languages
+  proposed_domain:
+    fields:
+      - domain_id
+      - cluster_ids
+      - repositories
+      - evidence
+      - confidence
+      - status
+
+pipeline:
+  - observe
+  - normalize
+  - feature
+  - vectorize
+  - cluster
+  - profile
+  - propose_domain
+  - validate
+  - declare
+
+mvp:
+  scope:
+    repositories: recent_30
+    features:
+      - name
+      - description
+      - topics
+      - language
+    algorithm: kmeans
+  deliverables:
+    - clusters.json
+    - cluster-profile.json
+    - proposed-domains.yaml
+    - simple HTML visualization
+
+ontology_boundary:
+  observed:
+    - github_metadata
+    - repository_topics
+    - repository_text
+  inferred:
+    - cluster
+    - similarity
+    - dominant_topics
+  proposed:
+    - domain
+    - capability
+    - synapse
+  validated:
+    - reviewed_cluster
+    - reviewed_domain
+  declared:
+    - ecosystem/domains/*.yaml
+
+principle: >
+  AW discovers structure; it does not declare ontology. Evidence is observed,
+  clusters are inferred, domains are proposed, and only validated structure
+  becomes a declared ecosystem domain.
