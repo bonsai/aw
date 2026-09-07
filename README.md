@@ -1,262 +1,167 @@
-# 🌱 repo2agent
+# 🌱 AW — Router + Generator
 
-**Repository → Structure → Agent Workflow**
+**Observe → Route → Discover → Propose → Generate → Validate → Execute → Evolve**
 
-`repo2agent` is the **midwife of agents**: it reads a repository's existing codebase, discovers its structure, proposes semantic clusters and agents, and generates agentic workflows after approval.
+AW is the self-organizing factory between observed GitHub repositories and declared organizational structure. It routes evidence to capabilities and generates new domains, repositories, agents, workflows, and synapses.
 
-The goal is not to generate YAML blindly. The goal is to turn repository evidence into an intermediate ontology and workforce proposal.
+## Core definition
 
-## Core transformation
-
-```text
-Repository
-   ↓
-Observe
-   ↓
-Understand
-   ↓
-Structure
-   ↓
-Cluster
-   ↓
-Propose domain / capability
-   ↓
-Propose agents
-   ↓
-Propose workflows
-   ↓
-Approve
-   ↓
-Generate
-   ↓
-Compile
-   ↓
-Execute
-```
-
-### repo2cluster
-
-Repository clustering belongs in AW because it is **discovery**, not ontology declaration.
+> **AW routes observations into generators, creating new repositories, domains, agents, workflows, and synapses.**
 
 ```text
-GitHub
-   ↓
- bonsai/repos
-   ↓
-name / description / topics / language / README
-   ↓
-semantic features
-   ↓
-vectorization
-   ↓
-KMeans / clustering
-   ↓
-cluster profile
-   ↓
-proposed domain
-   ↓
-ontology validation
-   ↓
-ecosystem/domains/*.yaml
+GitHub / repositories
+        ↓
+     OBSERVE
+        ↓
+       AW
+   ┌────┴────┐
+ ROUTER   GENERATORS
+   │          │
+   ↓          ↓
+repo/cluster  Domain / Repo / Agent / Workflow / Synapse
+   │          │
+   └────┬─────┘
+        ↓
+     VALIDATE
+        ↓
+     EXECUTE
+        ↓
+     EVIDENCE
+        ↓
+      EVOLVE
+        ↺
 ```
 
-The reusable experiment is defined in [`skills/repo2cluster.yaml`](skills/repo2cluster.yaml).
+## Router
 
-## Boundary
+`router/router.yaml` defines semantic routing rules. AW decides **where an observation or request should go**, rather than hard-coding one workflow for every repository.
 
 ```text
-observed   → GitHub metadata, topics, repository text
-inferred   → similarity, clusters, dominant topics
-proposed   → domains, capabilities, synapses, agents
-validated  → reviewed structure
- declared  → ecosystem ontology
+repository observation → repo2cluster
+semantic cluster       → cluster2domain
+domain candidate       → domain2repo
+domain candidate       → domain2synapse
+repository capability  → repo2agent
+approved workflow       → workflow-generator
 ```
 
-**AW discovers. Ecosystem declares.**
+## Generators
 
-Clustering must never silently rewrite the ontology. Its output is evidence-backed proposal data that can be reviewed and then promoted into `bonsai/ecosystem`.
-
-## The Midwife Model
-
-`repo2agent` is neither the CEO nor the worker.
-
-It acts as a **midwife**:
-
-- discovers capabilities already present in repositories
-- discovers semantic communities across repositories
-- identifies missing responsibilities
-- proposes domains and capabilities
-- proposes suitable agents
-- proposes workflows connecting those agents
-- records evidence and confidence
-- generates workflow source after approval
-- hands execution to `gh-aw` / GitHub Actions
+Generators turn proposals into concrete artifacts:
 
 ```text
-.company       = organization / policy
-AW             = observer / clusterer / agent midwife / compiler
-agent          = specialist
-workflow       = orchestration
-repos/         = repository observations
-ecosystem/     = declared semantic world
-GitHub Actions = execution
+generators/
+├── domain.yaml
+├── repo.yaml
+└── synapse.yaml
 ```
 
-## Agent Proposal Schema
+The target is to make Repo / Domain / Agent / Workflow / Synapse / Ontology all first-class generated artifacts.
 
-`schema.json` describes the intermediate model between repository evidence and generated workflows:
-
-```json
-{
-  "repository": {},
-  "ontology": {},
-  "agent_candidates": [],
-  "workflow_candidates": [],
-  "evidence": [],
-  "risk": {},
-  "approval": {},
-  "generated_workflows": []
-}
-```
-
-This intermediate layer is essential. AW should not perform a direct `README → YAML` conversion.
+A discovered domain can become a new repository proposal:
 
 ```text
-README ─┐
-Code   ─┤
-Issues ─┤→ Understanding → Structure → Proposal
-Tests  ─┤                         │
-Config ─┘                         ├→ Domain / Cluster
-                                  ├→ Agent
-                                  └→ Workflow
-                                         ↓
-                                      Approval
-                                         ↓
-                                   Agentic Workflow
+cluster → proposed domain → validated domain → repo generator → new repository
 ```
 
-## GitHub Agentic Workflows
-
-GitHub Agentic Workflows use Markdown workflow source with YAML frontmatter. The source is compiled by `gh aw compile` into a machine-ready `.lock.yml` workflow.
+Generated repository structure:
 
 ```text
-AW
- ↓
-.github/workflows/<agent-or-workflow>.md
- ↓
-gh aw compile
- ↓
-.github/workflows/<agent-or-workflow>.lock.yml
- ↓
-GitHub execution
+README.md
+AGENTS.md
+domain.yaml
+ontology.yaml
+synapse.yaml
+agents/
+.github/workflows/
 ```
 
-## Design Principles
+Repository creation remains an approval boundary.
 
-### 1. Evidence before agents
-Every proposed agent or domain should be traceable to repository evidence.
+## Self-organization workflow
 
-### 2. Discovery before declaration
-Clustering is an inference mechanism. It does not become ontology automatically.
-
-### 3. Ontology before workflow
-Understand the repository and its semantic neighborhood before deciding how to automate it.
-
-### 4. Proposal before execution
-Agent and workflow creation passes through a review/policy gate.
-
-### 5. No hard-coded departments
-The repository evidence determines candidate structure. Similar repositories may produce different workforces.
-
-### 6. Agents are replaceable
-The durable assets are ontology, evidence, and workflow contracts.
-
-### 7. Execution is downstream
-AW discovers and generates. `gh-aw` / GitHub Actions executes.
-
-## Architecture
+`workflows/evolve.md` defines the common loop:
 
 ```text
-                  bonsai.company
-                        │
-                  organization
-                        │
-                        ▼
-                       AW
-                repo2agent / repo2cluster
-                        │
-          ┌─────────────┼─────────────┐
-          ▼             ▼             ▼
-       repos/        ontology      evidence
-          │             │             │
-          └─────────────┼─────────────┘
-                        ▼
-                semantic structure
-                        │
-          ┌─────────────┼─────────────┐
-          ▼             ▼             ▼
-       clusters     capabilities    agents
-          │             │             │
-          └─────────────┼─────────────┘
-                        ▼
-                workflow candidates
-                        │
-                        ▼
-                  approval gate
-                        │
-                        ▼
-                 gh aw compile
-                        │
-                        ▼
-                  GitHub execution
-                        │
-                        ▼
-                    evidence
-                        │
-                        └────→ semantic review
+OBSERVE → DISCOVER → PROPOSE → GENERATE → VALIDATE → EVOLVE → OBSERVE
 ```
 
-## Relation to the Bonsai ecosystem
+The key difference from a simple `repo2agent` compiler is that AW can generate **new semantic structure and new repositories**, not merely workflows inside an existing repository.
+
+## Domain and Synapse discovery
+
+`repo2cluster` discovers semantic communities from repository evidence. `cluster2domain` turns an inferred cluster into a domain proposal. `domain2synapse` proposes weighted relationships, while `domain2repo` prepares a new repository structure.
 
 ```text
 repos
-  ↓ observation
-AW
-  ↓ discovery / proposal
-ecosystem
-  ↓ semantic declaration
-ontology
-  ↓ meaning
-synapse
-  ↓ relationships
-matrix
-  ↓ computation
-BQML
-  ↓ learning
-AW
-  ↓ reorganize / regenerate
+ ↓
+clusters
+ ↓
+proposed domain ─────→ proposed synapses
+ ↓
+validated domain
+ ↓
+new repo
+ ↓
+new agents / workflows
+ ↓
+evidence
+ ↺
 ```
 
-This makes AW the **self-organization engine at the boundary between observed repositories and declared organizational structure**.
+**AW discovers and generates. `bonsai/ecosystem` validates and declares.**
 
-## Roadmap
+## Lifecycle boundary
 
-- [ ] Repository inventory and evidence extraction
-- [ ] README / code / issue understanding
-- [ ] `repo2cluster` implementation
-- [ ] cluster profiling and confidence scoring
-- [ ] proposed domain generation
-- [ ] repository ontology extraction
-- [ ] agent candidate generation
-- [ ] workflow candidate generation
-- [ ] human approval gate
-- [ ] `.github/workflows/*.md` generation
-- [ ] `gh aw compile` integration
-- [ ] workflow validation and safety checks
-- [ ] CLI/API interface
-- [ ] MCP interface
-- [ ] BQML-based repository clustering and workforce analysis
+```text
+observed   → GitHub metadata, code, README, issues, workflows
+inferred   → clusters, similarity, capabilities
+proposed   → domains, synapses, agents, repositories
+generated  → YAML, repository manifests, workflow source
+validated  → reviewed structure
+declared   → ecosystem ontology
+```
 
-## One-line definition
+Generation must never silently promote a proposal to declared ontology.
 
-> **AW observes repositories, discovers their semantic structure, proposes the workforce, and turns approved structure into executable agentic workflows.**
+## Relation to Bonsai
+
+```text
+repos       = observation
+AW          = route / discover / generate / orchestrate
+ecosystem   = declared semantic world
+ontology    = meaning
+synapse     = relationship
+matrix      = computation
+BQML        = learning
+.company    = organization / policy
+GitHub      = execution and evidence
+```
+
+BQML can discover clusters and relationships; AW consumes those results and turns them into proposals and generated artifacts. BQML is not the source of truth.
+
+## Repository layout
+
+```text
+aw/
+├── README.md
+├── schema.json
+├── router/
+├── generators/
+├── skills/
+└── workflows/
+```
+
+## Design principles
+
+1. **Evidence before generation** — every proposal is traceable to evidence.
+2. **Discovery before declaration** — inference does not silently become ontology.
+3. **Router before workflow** — route according to semantic context.
+4. **Generation is first-class** — Repo, Domain, Agent, Workflow, and Synapse can be generated.
+5. **Proposal before creation** — new repositories and ontology declarations require validation.
+6. **Execution is downstream** — GitHub Actions / `gh-aw` executes approved workflows.
+7. **The loop is open** — generated structure becomes new evidence for the next cycle.
+
+## One-line architecture
+
+> **AW is a self-organizing factory that routes observations to generators and evolves the Bonsai repository/agent/workflow graph through evidence-backed proposals.**
