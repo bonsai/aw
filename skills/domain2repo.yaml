@@ -1,0 +1,16 @@
+id: domain2repo
+version: "0.1"
+purpose: Generate a new repository proposal from a validated domain candidate.
+inputs:
+  - proposed_domain
+  - ontology
+  - synapses
+  - agent_candidates
+outputs:
+  - repository_manifest
+  - repository_structure
+status: proposed
+requires:
+  - validation
+next:
+  - repo-generation
