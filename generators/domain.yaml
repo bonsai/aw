@@ -1,0 +1,23 @@
+id: domain-generator
+version: "0.1"
+kind: domain
+
+inputs:
+  - cluster_profile
+  - repository_evidence
+  - candidate_capabilities
+  - candidate_synapses
+
+outputs:
+  - domain.yaml
+
+lifecycle:
+  observed: evidence
+  inferred: cluster_profile
+  proposed: domain
+  validated: reviewed_domain
+  declared: ecosystem/domain
+
+rule: >
+  Generate domain proposals from evidence and inferred clusters. Never silently
+  promote a generated domain into the declared ecosystem ontology.
