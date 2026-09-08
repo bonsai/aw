@@ -16,6 +16,9 @@
   - `gh aw compile <id>` → `<id>.lock.yml`（GitHub Actions）→ merge → `gh aw run <id>`
   - 自前 `.aw`(JSON⇄YAML) は gh-aw の markdown + YAML frontmatter に吸収可能
 - ローカル gh aw は v0.88.2 導入済み。エンジン: claude/codex/copilot/gemini/pi。
+- **スキル公開**: `bonsai/gh-aw-skill`（https://github.com/bonsai/gh-aw-skill 、PUBLIC、topics: skill/gh-aw/agentic-workflows/cli/github/mcp）。
+  既存 `bonsai/gh-aw`（内製 Archimedes実行基盤）と名前衝突のため `-skill` 接尾辞で新規作成。Gym mode セクション追記済。
+- SKILL.md は Gym mode（validate→trial→audit/outcomes→forecast サイクル）を含む 155 行。
 
 ## 今セッションの完了（証拠）
 
