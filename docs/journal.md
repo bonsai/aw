@@ -52,3 +52,10 @@
 - skills: `.config/opencode/skills` 27 エントリ（壊れ 0）
 - gh aw: v0.88.2
 - my-skills index: commit `b94018b`（push 済、working tree = gitignore 2件追加のみ）
+## aw-api 決定（2026-09-08）
+
+- **構成**: DB キュー主線 + GCP Cloud Run REST（人間承認済）。
+- Spec 草案: `api/design.md` / `api/openapi.yaml` / `api/ddl.sql` / `api/task.schema.json`
+- フロー: Client →(IAP)→ Cloud Run aw-api →(enqueue)→ aw_tasks(Cloud SQL) →(claim by scheduler worker)→ `gh aw run` で GitHub Actions へ dispatch → Result を DB へ readback。📀 repos#7 の data 正本化の対象。
+- GitHub 認証: GitHub App `bonsai-aw-app`（PAT 非推奨）。コストガード: max_aic + forecast。
+- 未決定: DB=Cloud SQL vs Firestore / IAP 投入時期 / 認証単位 / schedule 拡張。→ Spec レビュー待ち。
