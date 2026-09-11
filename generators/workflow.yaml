@@ -1,0 +1,86 @@
+# Workflow generator manifest
+id: workflow-generator
+version: "0.1"
+kind: workflow
+
+purpose: >
+  Generate executable workflow definitions from an approved workflow proposal.
+  A workflow describes what to do; implementation functions define how it is done.
+
+inputs:
+  - intent
+  - domain
+  - source
+  - datasets
+  - candidate_steps
+  - execution_engine
+
+outputs:
+  workflow:
+    format: yaml
+    fields:
+      - name
+      - version
+      - intent
+      - steps
+      - inputs
+      - outputs
+      - governance
+
+step_contract:
+  required:
+    - name
+    - function
+  optional:
+    - input
+    - output
+    - approval
+  function_protocol:
+    formats:
+      - json-schema
+      - openapi
+
+lifecycle:
+  observed: evidence
+  inferred: workflow_candidate
+  proposed: workflow
+  generated: workflow.yaml
+  validated: approved_workflow
+  executed: run
+  evidenced: result
+
+execution:
+  approved_only: true
+  default_boundary: github-actions
+
+example:
+  name: world-evaluation
+  intent: Evaluate and evolve the canonical World model
+  steps:
+    - name: load-world
+      function: world.load
+      input:
+        source: bonsai/world
+        files:
+          - world.json
+          - world.sqlite
+    - name: build-dataset
+      function: bqmlite.dataset
+      input:
+        source: world.sqlite
+    - name: evaluate
+      function: bqmlite.run
+      input:
+        engine: bonsai/bqmlite-go
+    - name: record-evidence
+      function: evidence.record
+    - name: propose
+      function: governance.propose
+    - name: promote
+      function: governance.promote
+      approval: required
+
+rule: >
+  AW may generate workflow proposals and workflow source, but execution and
+  promotion remain explicit boundaries. Generated results never become canonical
+  ontology without governance approval.
