@@ -1,0 +1,59 @@
+# AW skill: generate a workflow from an approved workflow proposal
+id: workflow-generator
+name: Workflow Generator
+version: "0.1"
+
+purpose: >
+  Convert workflow intent, domain evidence, candidate steps, and function
+  contracts into a machine-readable workflow.yaml proposal.
+
+inputs:
+  - intent
+  - domain
+  - source
+  - datasets
+  - candidate_steps
+  - execution_engine
+
+outputs:
+  - workflow.yaml
+  - workflow_manifest
+
+pipeline:
+  - inspect
+  - normalize
+  - resolve_functions
+  - construct_steps
+  - validate_contracts
+  - generate
+  - propose
+  - approve
+  - execute
+
+step_contract:
+  required:
+    - name
+    - function
+  function_input:
+    source: JSON Schema or OpenAPI
+
+routing:
+  source: approved_agent_or_workflow
+  generator: generators/workflow.yaml
+
+execution:
+  approved_only: true
+  boundary: github-actions
+
+promotion:
+  automatic: false
+  rule: Generated workflow results are evidence; governance controls canonical promotion.
+
+example_target:
+  repository: bonsai/world
+  workflow: world-evaluation
+  engine: bonsai/bqmlite-go
+
+principle: >
+  AW generates the workflow contract; functions implement behavior; execution
+  occurs downstream after validation and approval.
