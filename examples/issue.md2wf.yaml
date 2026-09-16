@@ -1,0 +1,26 @@
+version: "0.1"
+name: issue.md2wf
+goal: "GitHub Issue のマークダウンで書かれた仕様を、検証可能なワークフロー定義(wf.yaml)へ変換する"
+steps:
+  - id: collect
+    kind: tool
+    tool: github
+    prompt: "対象 Issue の本文とラベルを読み込み、仕様・制約・受け入れ条件を抽出する"
+  - id: extract
+    kind: agent
+    prompt: "Issue 本文から以下を抽出する: goal / constraints / success criteria"
+    needs: [collect]
+  - id: design
+    kind: agent
+    prompt: "抽出結果から wf.yaml を生成する。version=0.1, name, goal, steps(id/kind/needs) の形式に従う"
+    needs: [extract]
+  - id: validate
+    kind: tool
+    tool: schema
+    prompt: "生成した wf.yaml を schema.json で静的検証する。invalid なら design へ戻す"
+    needs: [design]
+  - id: propose
+    kind: tool
+    tool: github
+    prompt: "検証済み wf.yaml を PR で提案する。Line の要約と元 Issue をリンクする"
+    needs: [validate]
