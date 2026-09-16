@@ -1,167 +1,79 @@
-# 🌱 AW — Router + Generator
+# 🌱 AW — Agentic Workflow アーキテクチャ
 
-**Observe → Route → Discover → Propose → Generate → Validate → Execute → Evolve**
-
-AW is the self-organizing factory between observed GitHub repositories and declared organizational structure. It routes evidence to capabilities and generates new domains, repositories, agents, workflows, and synapses.
-
-## Core definition
-
-> **AW routes observations into generators, creating new repositories, domains, agents, workflows, and synapses.**
+**AW は「親・仕様・入口」だけを持つ。実行の実体は 3 つのサブシステムに分割された。**
 
 ```text
-GitHub / repositories
-        ↓
-     OBSERVE
-        ↓
-       AW
-   ┌────┴────┐
- ROUTER   GENERATORS
-   │          │
-   ↓          ↓
-repo/cluster  Domain / Repo / Agent / Workflow / Synapse
-   │          │
-   └────┬─────┘
-        ↓
-     VALIDATE
-        ↓
-     EXECUTE
-        ↓
-     EVIDENCE
-        ↓
-      EVOLVE
-        ↺
+bonsai/aw            = AW architecture / contracts / ecosystem entrypoint
+bonsai/aw-router     = routing（どこへ送るか）
+bonsai/aw-generator  = generation（何を生成するか）
+bonsai/aw-runner     = gh aw execution（どう起動するか）
 ```
 
-## Router
+## 責務の境界
 
-`router/router.yaml` defines semantic routing rules. AW decides **where an observation or request should go**, rather than hard-coding one workflow for every repository.
+| リポジトリ | 責務 | 問い |
+|---|---|---|
+| **bonsai/aw** | 親・仕様・入口・契約 | What is AW? |
+| **bonsai/aw-router** | Route / Select | Where does it go? |
+| **bonsai/aw-generator** | Generate / Propose | What is generated? |
+| **bonsai/aw-runner** | Dispatch / Execute | How is it launched? |
+
+## 全体像
 
 ```text
-repository observation → repo2cluster
-semantic cluster       → cluster2domain
-domain candidate       → domain2repo
-domain candidate       → domain2synapse
-repository capability  → repo2agent
-approved workflow       → workflow-generator
+Issue
+  ↓
+Agent
+  ↓
+Solve
+  ↓
+aw-router
+  ↓
+aw-runner ──→ gh aw
+       │
+       ↓
+   workflow ──→ gh wf（bonsai/workflow）
+       │
+       ↓
+    Action
+       ↓
+    State
+       ↓
+    Goal
 ```
 
-## Generators
+`gh aw` は aw-runner 側、`gh wf` は `bonsai/workflow` 側という綺麗な境界になっている。
 
-Generators turn proposals into concrete artifacts:
-
-```text
-generators/
-├── domain.yaml
-├── repo.yaml
-└── synapse.yaml
-```
-
-The target is to make Repo / Domain / Agent / Workflow / Synapse / Ontology all first-class generated artifacts.
-
-A discovered domain can become a new repository proposal:
-
-```text
-cluster → proposed domain → validated domain → repo generator → new repository
-```
-
-Generated repository structure:
-
-```text
-README.md
-AGENTS.md
-domain.yaml
-ontology.yaml
-synapse.yaml
-agents/
-.github/workflows/
-```
-
-Repository creation remains an approval boundary.
-
-## Self-organization workflow
-
-`workflows/evolve.md` defines the common loop:
-
-```text
-OBSERVE → DISCOVER → PROPOSE → GENERATE → VALIDATE → EVOLVE → OBSERVE
-```
-
-The key difference from a simple `repo2agent` compiler is that AW can generate **new semantic structure and new repositories**, not merely workflows inside an existing repository.
-
-## Domain and Synapse discovery
-
-`repo2cluster` discovers semantic communities from repository evidence. `cluster2domain` turns an inferred cluster into a domain proposal. `domain2synapse` proposes weighted relationships, while `domain2repo` prepares a new repository structure.
-
-```text
-repos
- ↓
-clusters
- ↓
-proposed domain ─────→ proposed synapses
- ↓
-validated domain
- ↓
-new repo
- ↓
-new agents / workflows
- ↓
-evidence
- ↺
-```
-
-**AW discovers and generates. `bonsai/ecosystem` validates and declares.**
-
-## Lifecycle boundary
-
-```text
-observed   → GitHub metadata, code, README, issues, workflows
-inferred   → clusters, similarity, capabilities
-proposed   → domains, synapses, agents, repositories
-generated  → YAML, repository manifests, workflow source
-validated  → reviewed structure
-declared   → ecosystem ontology
-```
-
-Generation must never silently promote a proposal to declared ontology.
-
-## Relation to Bonsai
-
-```text
-repos       = observation
-AW          = route / discover / generate / orchestrate
-ecosystem   = declared semantic world
-ontology    = meaning
-synapse     = relationship
-matrix      = computation
-BQML        = learning
-.company    = organization / policy
-GitHub      = execution and evidence
-```
-
-BQML can discover clusters and relationships; AW consumes those results and turns them into proposals and generated artifacts. BQML is not the source of truth.
-
-## Repository layout
+## このリポジトリが持つもの
 
 ```text
 aw/
-├── README.md
-├── schema.json
-├── router/
-├── generators/
-├── skills/
-└── workflows/
+├── README.md        # ← エントリポイント
+├── spec.md          # AW 再設計仕様
+├── design.md        # 設計メモ
+├── ux.md            # ユーザー体験物語
+├── schema.json      # オントロジー契約
+├── docs/            # issue-solving-ecosystem 等
+├── examples/        # research.aw.yaml / research.wf.yaml 例
+└── issues/          # 設計イシュー
 ```
 
-## Design principles
+## サブシステム
 
-1. **Evidence before generation** — every proposal is traceable to evidence.
-2. **Discovery before declaration** — inference does not silently become ontology.
-3. **Router before workflow** — route according to semantic context.
-4. **Generation is first-class** — Repo, Domain, Agent, Workflow, and Synapse can be generated.
-5. **Proposal before creation** — new repositories and ontology declarations require validation.
-6. **Execution is downstream** — GitHub Actions / `gh-aw` executes approved workflows.
-7. **The loop is open** — generated structure becomes new evidence for the next cycle.
+- **bonsai/aw-router** — `router/router.yaml` で観測/要求を capabilities へルーティング。
+- **bonsai/aw-generator** — `generators/*.yaml` + スキルで proposal → artifact を生成。
+- **bonsai/aw-runner** — 実行境界。`gh aw` integration・TUI・API 設計・evolve ループ。
 
-## One-line architecture
+## 設計原則
 
-> **AW is a self-organizing factory that routes observations to generators and evolves the Bonsai repository/agent/workflow graph through evidence-backed proposals.**
+1. **Evidence before generation** — すべての proposal は観測にトレース可能
+2. **Discovery before declaration** — 推論は黙って ontology にならない
+3. **Router before workflow** — セマンティックコンテキストで送り先を決める
+4. **Generation is first-class** — Repo / Domain / Agent / Workflow / Synapse は生成される
+5. **Proposal before creation** — 新規 repo / ontology 宣言は承認が必要
+6. **Execution is downstream** — GitHub Actions / `gh aw` が実行する
+7. **The loop is open** — 生成物は次の観測になる
+
+## One-line
+
+> **AW は観測を routing / generation / execution の 3 層に分けて、Bonsai の repo・agent・workflow グラフを進化させる自己組織化ファクトリー。**
